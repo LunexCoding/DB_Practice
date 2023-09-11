@@ -28,8 +28,11 @@ class DatabaseConnection(object):
         self.dbConn.commit()
 
     def getRows(self, sql, data=None):
-        self.dbCursor.execute(sql, data)
-        return self.dbCursor.fetchone()
+        if data is not None:
+            self.dbCursor.execute(sql, data)
+        else:
+            self.dbCursor.execute(sql)
+        return self.dbCursor.fetchall()
 
     @property
     def connection(self):
