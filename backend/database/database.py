@@ -1,10 +1,14 @@
 import sqlite3
+
+from helpers.fileSystem import FileSystem
 from settingsConfig import settingsConfig
 
 
 class DatabaseConnection(object):
     def __init__(self, __settings):
-        self.__settings = __settings
+        if not FileSystem.exists(settingsConfig.DatabaseSettings["database"]):
+            self.__settings = dict(database=__settings["databaseName"])
+        self.__settings = dict(database=__settings["database"])
         self.dbConn = None
         self.dbCursor = None
 

@@ -1,80 +1,70 @@
 class SqlQueries:
-    @staticmethod
-    def applyingSettings():
-        return """PRAGMA foreign_keys = ON"""
-
-    @staticmethod
-    def createTableImportances():
-        return """
-        CREATE TABLE IF NOT EXISTS 'importances' (
-            `importanceID` INTEGER PRIMARY KEY,
-            `name` VARCHAR(50) NOT NULL UNIQUE
+    applyingSettings = """PRAGMA foreign_keys = ON"""
+    createTableEnterprises = """
+        CREATE TABLE IF NOT EXISTS 'Enterprises' (
+            `ID` INT PRIMARY KEY,
+            `Name` VARCHAR(255),
+            `Address` VARCHAR(255),
+            `ContactInfo` VARCHAR(255),
+            `CurrencyID` INT,
+            FOREIGN KEY (CurrencyID) REFERENCES Currency(ID) ON DELETE CASCADE
         );
-        """
-
-    @staticmethod
-    def createTableMeasures():
-        return """
-        CREATE TABLE IF NOT EXISTS 'measures' (
-            `measureID` INTEGER PRIMARY KEY,
-            `name` VARCHAR(100) NOT NULL UNIQUE
+    """
+    createTableFinancialYears = """
+        CREATE TABLE IF NOT EXISTS 'FinancialYears' (
+            `ID` INT PRIMARY KEY,
+            `Year` INT
         );
-        """
-
-    @staticmethod
-    def createTableCurrencies():
-        return """
-        CREATE TABLE IF NOT EXISTS 'currencies' (
-            `currencyID` INTEGER PRIMARY KEY,
-            `name` VARCHAR(100) NOT NULL UNIQUE,
-            `rateInRubles` FLOAT
+    """
+    createTableFinancialReports = """
+        CREATE TABLE IF NOT EXISTS 'FinancialReports' (
+            `ID` INT PRIMARY KEY,
+            `EnterpriseID` INT,
+            `YearID` INT,
+            `ReportDate` DATE,
+            FOREIGN KEY (EnterpriseID) REFERENCES Enterprises(ID) ON DELETE CASCADE,
+            FOREIGN KEY (YearID) REFERENCES FinancialYears(ID) ON DELETE CASCADE
         );
-        """
-
-    @staticmethod
-    def createTableIndicators():
-        return """
-        CREATE TABLE IF NOT EXISTS 'indicators' (
-            `indicatorID` INTEGER PRIMARY KEY,
-            `name` VARCHAR(100) NOT NULL UNIQUE,
-            `importanceID` INTEGER,
-            `measureID` INTEGER,
-            FOREIGN KEY (importanceID) references importances(importanceID) ON DELETE CASCADE,
-            FOREIGN KEY (measureID) references measures(measureID) ON DELETE CASCADE
+    """
+    createTableBalanceSheet = """
+        CREATE TABLE IF NOT EXISTS 'BalanceSheet' (
+            `ID` INT PRIMARY KEY,
+            `ReportID` INT,
+            `Assets` FLOAT,
+            `Liabilities` FLOAT,
+            `Capital` FLOAT,
+            `MarketCapitalization` FLOAT,
+            `NumberOfShares` INT,
+            `SharePrice` FLOAT,
+            FOREIGN KEY (ReportID) REFERENCES FinancialReports(ID) ON DELETE CASCADE
         );
-        """
-
-    @staticmethod
-    def createTableDates():
-        return """
-        CREATE TABLE IF NOT EXISTS 'dates' (
-            `dateID` INTEGER PRIMARY KEY,
-            `date` DATE NOT NULL UNIQUE
+    """
+    createTableIncomeStatement = """
+        CREATE TABLE IF NOT EXISTS 'IncomeStatement' (
+            `ID` INT PRIMARY KEY,
+            `ReportID` INT,
+            `Revenue` FLOAT,
+            `Expenses` FLOAT,
+            `Dividends` FLOAT,
+            `NetProfit` FLOAT,
+            FOREIGN KEY (ReportID) REFERENCES FinancialReports(ID) ON DELETE CASCADE
         );
-        """
-
-    @staticmethod
-    def createTableCompanies():
-        return """
-        CREATE TABLE IF NOT EXISTS 'companies' (
-            `companyID` INTEGER PRIMARY KEY,
-            `name` VARCHAR(255) NOT NULL UNIQUE,
-            `phone` VARCHAR(11),
-            `contactPerson` VARCHAR(255)
+    """
+    createTableCurrencies = """
+        CREATE TABLE IF NOT EXISTS 'Currencies' (
+            `ID` INTEGER PRIMARY KEY,
+            `Name` VARCHAR(255),
+            `RateInRubles` FLOAT
         );
-        """
-
-    @staticmethod
-    def createTableDynamics():
-        return """
-        CREATE TABLE IF NOT EXISTS 'dynamics' (
-            `dynamicsID` VARCHAR(36) PRIMARY KEY,
-            `companyID` INTEGER,
-            `indicatorID` INTEGER,
-            `dateID` INTEGER,
-            `value` FLOAT,
-            FOREIGN KEY (companyID) references companies(companyID) ON DELETE CASCADE,
-            FOREIGN KEY (indicatorID) references indicators(indicatorID) ON DELETE CASCADE,
-            FOREIGN KEY (dateID) references dates(dateID) ON DELETE CASCADE
+    """
+    createTableFinancialIndicators = """
+        CREATE TABLE IF NOT EXISTS 'FinancialIndicators' (
+            `ID` INT PRIMARY KEY,
+            `ReportID` INT,
+            `InterestCoverageRatio` FLOAT,
+            `P/E ratio` FLAOT,
+            `DividendsPerShare` FLOAT,
+            `SharePriceChange` FLOAT,
+            FOREIGN KEY (ReportID) REFERENCES FinancialReports(ID) ON DELETE CASCADE
         );
-        """
+    """
