@@ -8,9 +8,7 @@ class _SettingsConfig:
     def __loadSettings(self):
         __settings = {}
         __settings["DATABASE"] = dict(
-            databaseName=config("DB_NAME"),
-            databasePathToMove=config("DB_PATH_TO_MOVE"),
-            database=config("DB_PATH")
+            database=config("DB_NAME"),
         )
         return __settings
 

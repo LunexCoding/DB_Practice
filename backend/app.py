@@ -8,12 +8,10 @@ from helpers.fileSystemExceptions import (
     PathExistsAsDirectoryException,
     PathNotFoundException
 )
-from initializer.initializer import initializeDatabase
+
 
 class App:
     def __init__(self):
-        initializeDatabase()
-
         self.__window = MainWindow()
         self._ui_manager = UIManager(self.__window)
 

@@ -1,70 +1,62 @@
+from backend.database.tables import DatabaseTables
+
+
 class SqlQueries:
     applyingSettings = """PRAGMA foreign_keys = ON"""
-    createTableEnterprises = """
-        CREATE TABLE IF NOT EXISTS 'Enterprises' (
-            `ID` INT PRIMARY KEY,
-            `Name` VARCHAR(255),
-            `Address` VARCHAR(255),
-            `ContactInfo` VARCHAR(255),
-            `CurrencyID` INT,
-            FOREIGN KEY (CurrencyID) REFERENCES Currency(ID) ON DELETE CASCADE
-        );
-    """
-    createTableFinancialYears = """
-        CREATE TABLE IF NOT EXISTS 'FinancialYears' (
-            `ID` INT PRIMARY KEY,
-            `Year` INT
-        );
-    """
-    createTableFinancialReports = """
-        CREATE TABLE IF NOT EXISTS 'FinancialReports' (
-            `ID` INT PRIMARY KEY,
-            `EnterpriseID` INT,
-            `YearID` INT,
-            `ReportDate` DATE,
-            FOREIGN KEY (EnterpriseID) REFERENCES Enterprises(ID) ON DELETE CASCADE,
-            FOREIGN KEY (YearID) REFERENCES FinancialYears(ID) ON DELETE CASCADE
-        );
-    """
-    createTableBalanceSheet = """
-        CREATE TABLE IF NOT EXISTS 'BalanceSheet' (
-            `ID` INT PRIMARY KEY,
-            `ReportID` INT,
-            `Assets` FLOAT,
-            `Liabilities` FLOAT,
-            `Capital` FLOAT,
-            `MarketCapitalization` FLOAT,
-            `NumberOfShares` INT,
-            `SharePrice` FLOAT,
-            FOREIGN KEY (ReportID) REFERENCES FinancialReports(ID) ON DELETE CASCADE
-        );
-    """
-    createTableIncomeStatement = """
-        CREATE TABLE IF NOT EXISTS 'IncomeStatement' (
-            `ID` INT PRIMARY KEY,
-            `ReportID` INT,
-            `Revenue` FLOAT,
-            `Expenses` FLOAT,
-            `Dividends` FLOAT,
-            `NetProfit` FLOAT,
-            FOREIGN KEY (ReportID) REFERENCES FinancialReports(ID) ON DELETE CASCADE
-        );
-    """
-    createTableCurrencies = """
-        CREATE TABLE IF NOT EXISTS 'Currencies' (
+    createTableFinancialYears = f"""
+            CREATE TABLE IF NOT EXISTS {DatabaseTables.FINANCIAL_YEARS} (
+                `ID` INTEGER PRIMARY KEY,
+                `Year` INTEGER
+            );
+        """
+    createTableMeasures = f"""
+               CREATE TABLE IF NOT EXISTS {DatabaseTables.MEASURES} (
+                   `ID` INTEGER PRIMARY KEY,
+                   `Measure` VARCHAR(255)
+               );
+           """
+    createTableFinancialIndicators = f"""
+            CREATE TABLE IF NOT EXISTS {DatabaseTables.FINANCIAL_INDICATORS} (
+                `ID` INTEGER PRIMARY KEY,
+                `Name` VARCHAR(255),
+                `MeasureID` INTEGER
+                FOREIGN KEY (MeasureID) REFERENCES {DatabaseTables.MEASURES}(ID) ON DELETE CASCADE
+            );
+        """
+    createTableCurrencies = f"""
+        CREATE TABLE IF NOT EXISTS {DatabaseTables.CURRENCIES} (
             `ID` INTEGER PRIMARY KEY,
             `Name` VARCHAR(255),
             `RateInRubles` FLOAT
         );
     """
-    createTableFinancialIndicators = """
-        CREATE TABLE IF NOT EXISTS 'FinancialIndicators' (
-            `ID` INT PRIMARY KEY,
-            `ReportID` INT,
-            `InterestCoverageRatio` FLOAT,
-            `P/E ratio` FLAOT,
-            `DividendsPerShare` FLOAT,
-            `SharePriceChange` FLOAT,
-            FOREIGN KEY (ReportID) REFERENCES FinancialReports(ID) ON DELETE CASCADE
+    createTableEnterprises = f"""
+        CREATE TABLE IF NOT EXISTS {DatabaseTables.ENTERPRISES} (
+            `ID` INTEGER PRIMARY KEY,
+            `Name` VARCHAR(255),
+            `Phone` VARCHAR(11),
+            `CurrencyID` INTEGER,
+            FOREIGN KEY (CurrencyID) REFERENCES {DatabaseTables.CURRENCIES}(ID) ON DELETE SET NULL
+        );
+    """
+    createTableFinancialReports = f"""
+        CREATE TABLE IF NOT EXISTS {DatabaseTables.FINANCIAL_REPORTS} (
+            `ID` INTEGER PRIMARY KEY,
+            `EnterpriseID` INTEGER,
+            `YearID` INTEGER,
+            `ReportDate` DATE,
+            FOREIGN KEY (EnterpriseID) REFERENCES {DatabaseTables.ENTERPRISES}(ID) ON DELETE CASCADE,
+            FOREIGN KEY (YearID) REFERENCES {DatabaseTables.FINANCIAL_YEARS}(ID) ON DELETE CASCADE
+        );
+    """
+    createTableBalanceSheet = f"""
+        CREATE TABLE IF NOT EXISTS {DatabaseTables.BALANCE_SHEET} (
+            `ID` INTEGER PRIMARY KEY,
+            `EnterpriseID` INTEGER,
+            `FinancialIndicatorID` INTEGER,
+            `FinancialIndicatorValue` FLOAT,
+            FOREIGN KEY (EnterpriseID) REFERENCES {DatabaseTables.ENTERPRISES}(ID) ON DELETE CASCADE,
+            FOREIGN KEY (FinancialIndicatorID) REFERENCES {DatabaseTables.FINANCIAL_INDICATORS}(ID) ON DELETE SET NULL
+            FOREIGN KEY (FinancialIndicatorValue) REFERENCES {DatabaseTables.FINANCIAL_INDICATORS}(ID) ON DELETE SET NULL
         );
     """

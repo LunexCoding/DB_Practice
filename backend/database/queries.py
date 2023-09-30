@@ -55,3 +55,6 @@ class SqlQueries:
         FROM {tableName}
         WHERE {targetElement}={targetValue}
         """
+
+
+class SqlQueriesTypes:

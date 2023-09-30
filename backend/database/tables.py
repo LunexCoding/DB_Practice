@@ -2,10 +2,12 @@ from enum import StrEnum
 
 
 class DatabaseTables(StrEnum):
-    ENTERPRISES = "Enterprises"
     FINANCIAL_YEARS = "FinancialYears"
+    MEASURES = "Measures"
+    FINANCIAL_INDICATORS = "FinancialIndicators"
+    CURRENCIES = "Currencies"
+    ENTERPRISES = "Enterprises"
     FINANCIAL_REPORTS = "FinancialReports"
     BALANCE_SHEET = "BalanceSheet"
-    INCOME_STATEMENT = "IncomeStatement"
-    CURRENCIES = "Currencies"
-    FINANCIAL_INDICATORS = "FinancialIndicators"
+
+
