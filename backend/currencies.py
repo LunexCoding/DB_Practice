@@ -14,4 +14,5 @@ class _CurrencyParser:
     def countCurrencies(self):
         return len([dict(name=value["Name"], value=value["Value"]) for currency, value in self.__response["Valute"].items()])
 
+
 parser = _CurrencyParser("https://www.cbr-xml-daily.ru/daily_json.js")

@@ -19,14 +19,14 @@ class SqlQueries:
     @staticmethod
     def insertIntoTable(tableName, *args):
         return f"""
-        INSERT INTO {tableName}
-        ({', '.join([char for char in args])})
-        VALUES ({', '.join(["?" for char in args])})
+            INSERT INTO {tableName}
+            ({', '.join([char for char in args])})
+            VALUES ({', '.join(["?" for char in args])})
         """
 
     # SELECT ROWS FROM TABLE #
     @staticmethod
-    def selectFromTable(tableName, targetElement=None, targetValue=None, *args):
+    def selectFromTable(tableName, targetElement=None, targetValue=None, args=None):
         if targetElement == "*":
             return SqlQueries._selectAllFromTable(tableName)
         if targetElement and targetValue is not None:
@@ -53,8 +53,5 @@ class SqlQueries:
         return f"""
         SELECT {', '.join([char for char in args])}
         FROM {tableName}
-        WHERE {targetElement}={targetValue}
+        WHERE {targetElement}=?
         """
-
-
-class SqlQueriesTypes:

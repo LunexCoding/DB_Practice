@@ -1,6 +1,5 @@
 import sqlite3
 
-from helpers.fileSystem import FileSystem
 from settingsConfig import settingsConfig
 
 
@@ -29,12 +28,14 @@ class DatabaseConnection(object):
             self.dbCursor.execute(sql)
         self.dbConn.commit()
 
-    def getRows(self, sql, data=None):
+    def getRows(self, sql, data=None, all=False):
         if data is not None:
             self.dbCursor.execute(sql, data)
         else:
             self.dbCursor.execute(sql)
-        return self.dbCursor.fetchall()
+        if all:
+            return self.dbCursor.fetchall()
+        return self.dbCursor.fetchone()
 
     @property
     def connection(self):

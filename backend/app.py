@@ -8,10 +8,15 @@ from helpers.fileSystemExceptions import (
     PathExistsAsDirectoryException,
     PathNotFoundException
 )
+from settingsConfig import settingsConfig
+from initializer.initializer import Initializer
 
 
 class App:
     def __init__(self):
+        if not FileSystem.exists(settingsConfig.DatabaseSettings["database"]):
+            Initializer.run()
+
         self.__window = MainWindow()
         self._ui_manager = UIManager(self.__window)
 

@@ -8,63 +8,88 @@ from backend.database.pipeline import DatabasePipeline
 from backend.database.queries import SqlQueries
 from backend.database.tables import DatabaseTables
 from backend.currencies import parser
-
+from backend.models.enterprise import Enterprise
 
 
 fake = Faker("ru_RU")
 Faker.seed(0)
 
 
-def initializeDatabase():
-    databaseCreationPipeline = DatabasePipeline()
-    databaseCreationPipeline.addOperation(initializerQueries.applyingSettings)
-    databaseCreationPipeline.addOperation(initializerQueries.createTableFinancialYears)
-    databaseCreationPipeline.addOperation(initializerQueries.createTableMeasures)
-    databaseCreationPipeline.addOperation(initializerQueries.createTableFinancialIndicators)
-    databaseCreationPipeline.addOperation(initializerQueries.createTableCurrencies)
-    databaseCreationPipeline.addOperation(initializerQueries.createTableEnterprises)
-    databaseCreationPipeline.addOperation(initializerQueries.createTableFinancialReports)
-    databaseCreationPipeline.addOperation(initializerQueries.createTableBalanceSheet)
-    databaseCreationPipeline.run()
+class Initializer:
+    @staticmethod
+    def initializeDatabase():
+        databaseCreationPipeline = DatabasePipeline()
+        databaseCreationPipeline.addOperation(initializerQueries.applyingSettings)
+        databaseCreationPipeline.addOperation(initializerQueries.createTableFinancialYears)
+        databaseCreationPipeline.addOperation(initializerQueries.createTableMeasures)
+        databaseCreationPipeline.addOperation(initializerQueries.createTableFinancialIndicators)
+        databaseCreationPipeline.addOperation(initializerQueries.createTableCurrencies)
+        databaseCreationPipeline.addOperation(initializerQueries.createTableEnterprises)
+        databaseCreationPipeline.addOperation(initializerQueries.createTableFinancialReports)
+        databaseCreationPipeline.addOperation(initializerQueries.createTableBalanceSheet)
+        databaseCreationPipeline.run()
 
+    @classmethod
+    def initializeData(cls):
+        databaseDataCreationPipeline = DatabasePipeline()
+        # INSERT YEARS
+        for year in cls.generateYears():
+            databaseDataCreationPipeline.addOperation(
+                SqlQueries.insertIntoTable(DatabaseTables.FINANCIAL_YEARS, "Year"),
+                data=[year]
+            )
 
-    databaseDataCreationPipeline = DatabasePipeline()
-    for year in range(Constants.START_YEAR, Constants.START_YEAR + Constants.COUNT):
-        databaseDataCreationPipeline.addOperation(
-            SqlQueries.insertIntoTable(DatabaseTables.FINANCIAL_YEARS, "Year"),
-            data=[year]
-        )
-    for measure in Constants.MEASURES:
-        databaseDataCreationPipeline.addOperation(
-            SqlQueries.insertIntoTable(DatabaseTables.MEASURES, "Name"),
-            data=[measure]
-        )
-    for financialIndicator, measure in Constants.FINANCIAL_INDICATORS.items():
-        d
-        # databaseDataCreationPipeline.addOperation(
-        #     SqlQueries.insertIntoTable(DatabaseTables.MEASURES, "Name", "MeasureID"),
-        #     data=[measure]
-        # )
+        # INSERT MEASURES
+        for measure in cls.generateMeasures():
+            databaseDataCreationPipeline.addOperation(
+                SqlQueries.insertIntoTable(DatabaseTables.MEASURES, "Measure"),
+                data=[measure]
+            )
 
-    for currency in parser.currencies:
-        databaseDataCreationPipeline.addOperation(
-            SqlQueries.insertIntoTable(DatabaseTables.CURRENCIES, "Name", "RateInRubles"),
-            data=[currency["name"], currency["value"]]
-        )
+        # INSERT FINANCIAL INDICATORS
+        databaseDataCreationPipeline.run()
+        for indicator, measure in Constants.FINANCIAL_INDICATORS.items():
+            MeasureID = databaseDataCreationPipeline.getData(
+                SqlQueries.selectFromTable(DatabaseTables.MEASURES, targetElement="Measure", targetValue=measure, args=["ID"]),
+                data=[measure]
+            )[0]
+            databaseDataCreationPipeline.addOperation(
+                SqlQueries.insertIntoTable(DatabaseTables.FINANCIAL_INDICATORS, "Name", "MeasureID"),
+                data=[indicator, MeasureID]
+            )
 
+        # INSERT CURRENCIES
+        for currency in cls.generateCurrencies():
+            databaseDataCreationPipeline.addOperation(
+                SqlQueries.insertIntoTable(DatabaseTables.CURRENCIES, "Name", "RateInRubles"),
+                data=[currency["name"], currency["value"]]
+            )
 
+        # INSERT ENTERPRISES
+        for company in cls.generateCompany():
+            databaseDataCreationPipeline.addOperation(
+                SqlQueries.insertIntoTable(DatabaseTables.ENTERPRISES, "Name", "Phone", "CurrencyID"),
+                data=[*company]
+            )
+        databaseDataCreationPipeline.run()
 
-    for _ in range(15):
-        databaseDataCreationPipeline.addOperation(
-            SqlQueries.insertIntoTable(DatabaseTables.ENTERPRISES, "Name", "Phone", "CurrencyID"),
-            data=[fake.company(), re.sub("\D", "", fake.phone_number()), fake.random_int(1, parser.countCurrencies + 1)]
-        )
+    @staticmethod
+    def generateYears():
+        return [year for year in range(Constants.START_YEAR, Constants.START_YEAR + Constants.COUNT)]
 
+    @staticmethod
+    def generateMeasures():
+        return [measure for measure in Constants.MEASURES]
 
-    databaseDataCreationPipeline.run()
+    @staticmethod
+    def generateCurrencies():
+        return [currency for currency in parser.currencies]
 
+    @staticmethod
+    def generateCompany():
+        return [(fake.company(), re.sub("\D", "", fake.phone_number()), fake.random_int(1, parser.countCurrencies + 1)) for _ in range(15)]
 
-if __name__ == "__main__":
-    initializeDatabase()
-
-
+    @classmethod
+    def run(cls):
+        cls.initializeDatabase()
+        cls.initializeData()
