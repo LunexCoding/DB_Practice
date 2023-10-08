@@ -9,7 +9,7 @@ class DatabasePipeline:
 
     def getData(self, operation, data=None, all=False):
         with databaseSession as db:
-            return db.getRows(operation, data, all)
+            return db.getData(operation, data, all)
 
     def run(self):
         with databaseSession as db:

@@ -15,9 +15,11 @@ fake = Faker("ru_RU")
 Faker.seed(0)
 
 
-class Initializer:
-    @staticmethod
-    def initializeDatabase():
+class _Initializer:
+    def __init__(self):
+        self._enterprises = []
+
+    def initializeDatabase(self):
         databaseCreationPipeline = DatabasePipeline()
         databaseCreationPipeline.addOperation(initializerQueries.applyingSettings)
         databaseCreationPipeline.addOperation(initializerQueries.createTableFinancialYears)
@@ -29,67 +31,81 @@ class Initializer:
         databaseCreationPipeline.addOperation(initializerQueries.createTableBalanceSheet)
         databaseCreationPipeline.run()
 
-    @classmethod
-    def initializeData(cls):
+    def initializeData(self):
         databaseDataCreationPipeline = DatabasePipeline()
         # INSERT YEARS
-        for year in cls.generateYears():
+        for year in self.generateYears():
             databaseDataCreationPipeline.addOperation(
                 SqlQueries.insertIntoTable(DatabaseTables.FINANCIAL_YEARS, "Year"),
                 data=[year]
             )
 
         # INSERT MEASURES
-        for measure in cls.generateMeasures():
+        for measure in self.generateMeasures():
             databaseDataCreationPipeline.addOperation(
                 SqlQueries.insertIntoTable(DatabaseTables.MEASURES, "Measure"),
                 data=[measure]
             )
+        databaseDataCreationPipeline.run()
 
         # INSERT FINANCIAL INDICATORS
-        databaseDataCreationPipeline.run()
         for indicator, measure in Constants.FINANCIAL_INDICATORS.items():
-            MeasureID = databaseDataCreationPipeline.getData(
+            measureID = databaseDataCreationPipeline.getData(
                 SqlQueries.selectFromTable(DatabaseTables.MEASURES, targetElement="Measure", targetValue=measure, args=["ID"]),
                 data=[measure]
             )[0]
             databaseDataCreationPipeline.addOperation(
                 SqlQueries.insertIntoTable(DatabaseTables.FINANCIAL_INDICATORS, "Name", "MeasureID"),
-                data=[indicator, MeasureID]
+                data=[indicator, measureID]
             )
 
         # INSERT CURRENCIES
-        for currency in cls.generateCurrencies():
+        for currency in self.generateCurrencies():
             databaseDataCreationPipeline.addOperation(
                 SqlQueries.insertIntoTable(DatabaseTables.CURRENCIES, "Name", "RateInRubles"),
                 data=[currency["name"], currency["value"]]
             )
+        databaseDataCreationPipeline.run()
 
         # INSERT ENTERPRISES
-        for company in cls.generateCompany():
+        self.generateEnterprises()
+        for enterprise in self._enterprises:
             databaseDataCreationPipeline.addOperation(
                 SqlQueries.insertIntoTable(DatabaseTables.ENTERPRISES, "Name", "Phone", "CurrencyID"),
-                data=[*company]
+                data=[enterprise.name, enterprise.phone, enterprise.currencyID]
             )
         databaseDataCreationPipeline.run()
 
-    @staticmethod
-    def generateYears():
+    def generateYears(self):
         return [year for year in range(Constants.START_YEAR, Constants.START_YEAR + Constants.COUNT)]
 
-    @staticmethod
-    def generateMeasures():
+    def generateMeasures(self):
         return [measure for measure in Constants.MEASURES]
 
-    @staticmethod
-    def generateCurrencies():
+    def generateCurrencies(self):
         return [currency for currency in parser.currencies]
 
-    @staticmethod
-    def generateCompany():
-        return [(fake.company(), re.sub("\D", "", fake.phone_number()), fake.random_int(1, parser.countCurrencies + 1)) for _ in range(15)]
+    def generateEnterprises(self):
+        for enterpriseID in range(1, 16):
+            enterprise = Enterprise(
+                ID=enterpriseID,
+                name=fake.company(),
+                phone=re.sub("\D", "", fake.phone_number()),
+                currencyID=fake.random_int(1, parser.countCurrencies),
+                numberOfEmployees=fake.random_int(Constants.MIN_NUMBER_OF_EMPLOYEES, Constants.MAX_NUMBER_OF_EMPLOYEES),
+                revenue=fake.random_int(Constants.MIN_REVENUE, Constants.MAX_REVENUE),
+                profit=fake.random_int(Constants.MIN_PROFIT, Constants.MAX_PROFIT),
+                fixedAssetsAreAverage=fake.random_int(Constants.MIN_FIXED_ASSETS_ARE_AVERAGE, Constants.MAX_FIXED_ASSETS_ARE_AVERAGE)
+            )
+            self._enterprises.append(enterprise)
 
-    @classmethod
-    def run(cls):
-        cls.initializeDatabase()
-        cls.initializeData()
+    def run(self):
+        self.initializeDatabase()
+        self.initializeData()
+
+    @property
+    def enterprises(self):
+        return self._enterprises
+
+
+g_initializer = _Initializer()

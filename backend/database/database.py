@@ -28,7 +28,7 @@ class DatabaseConnection(object):
             self.dbCursor.execute(sql)
         self.dbConn.commit()
 
-    def getRows(self, sql, data=None, all=False):
+    def getData(self, sql, data=None, all=False):
         if data is not None:
             self.dbCursor.execute(sql, data)
         else:
