@@ -4,22 +4,23 @@ from backend.database.queries import SqlQueries
 
 
 class Enterprise:
-    def __init__(self, ID, name, phone, currencyID, numberOfEmployees, revenue, profit, fixedAssetsAreAverage):
+    def __init__(self, ID, name, phone, currencyID):
         self._ID = ID
         self._name = name
         self._phone = phone
         self._currencyID = currencyID
 
-        self._numberOfEmployees = numberOfEmployees
-        self._revenue = revenue
-        self._profit = profit
-        self._fixedAssetsAreAverage = fixedAssetsAreAverage
+        self._numberOfEmployees = None
+        self._revenue = None
+        self._profit = None
+        self._fixedAssetsAreAverage = None
+        self._capitalProductivity = None
+        self._capitalIntensity = None
+        self._capitalRatio = None
+        self._equityReturn = None
 
-        rateInRubles = self._getRateInRublesByCurrencyID()
-        self._capitalProductivity = round((self.revenue / self.fixedAssetsAreAverage) * rateInRubles, 2)
-        self._capitalIntensity = round((self.fixedAssetsAreAverage / self.revenue) * rateInRubles, 2)
-        self._capitalRatio = round((self.fixedAssetsAreAverage / self.numberOfEmployees) * rateInRubles, 2)
-        self._equityReturn = round(((self.profit / self.fixedAssetsAreAverage) * rateInRubles) * 100, 2)
+    def calcFinancialIndicators(self, numberOfEmployees, revenue, profit, fixedAssetsAreAverage):
+        self._calcFinacialIndicators(numberOfEmployees, revenue, profit, fixedAssetsAreAverage)
 
     def _getRateInRublesByCurrencyID(self):
         with databaseSession as db:
@@ -28,6 +29,17 @@ class Enterprise:
                 data=[self._currencyID]
             )
             return currency[1]
+
+    def _calcFinacialIndicators(self, numberOfEmployees, revenue, profit, fixedAssetsAreAverage):
+        self._numberOfEmployees = numberOfEmployees
+        self._revenue = revenue
+        self._profit = profit
+        self._fixedAssetsAreAverage = fixedAssetsAreAverage
+        rateInRubles = self._getRateInRublesByCurrencyID()
+        self._capitalProductivity = round((self._revenue / self._fixedAssetsAreAverage) * rateInRubles, 2)
+        self._capitalIntensity = round((self._fixedAssetsAreAverage / self._revenue) * rateInRubles, 2)
+        self._capitalRatio = round((self._fixedAssetsAreAverage / self._numberOfEmployees) * rateInRubles, 2)
+        self._equityReturn = round(((self._profit / self._fixedAssetsAreAverage) * rateInRubles) * 100, 2)
 
     @property
     def ID(self):
@@ -46,33 +58,14 @@ class Enterprise:
         return self._currencyID
 
     @property
-    def numberOfEmployees(self):
-        return self._numberOfEmployees
-
-    @property
-    def revenue(self):
-        return self._revenue
-
-    @property
-    def fixedAssetsAreAverage(self):
-        return self._fixedAssetsAreAverage
-
-    @property
-    def profit(self):
-        return self._profit
-
-    @property
-    def capitalProductivity(self):
-        return self._capitalProductivity
-
-    @property
-    def capitalIntensity(self):
-        return self._capitalIntensity
-
-    @property
-    def capitalRatio(self):
-        return self._capitalRatio
-
-    @property
-    def equityReturn(self):
-        return self._equityReturn
+    def financialIndicators(self):
+        return dict(
+            Численность=self._numberOfEmployees,
+            Выручка=self._revenue,
+            Прибыль=self._profit,
+            ОСс=self._fixedAssetsAreAverage,
+            Фондоотдача=self._capitalProductivity,
+            Фондоёмкость=self._capitalIntensity,
+            Фондовооруженность=self._capitalRatio,
+            Фондорентабельность=self._equityReturn
+        )

@@ -7,10 +7,6 @@ class DatabasePipeline:
     def addOperation(self, operation, data=None):
         self.__operations.append([operation, data])
 
-    def getData(self, operation, data=None, all=False):
-        with databaseSession as db:
-            return db.getData(operation, data, all)
-
     def run(self):
         with databaseSession as db:
             for operation in self.__operations:
