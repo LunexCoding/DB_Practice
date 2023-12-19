@@ -1,0 +1,6 @@
+testing/
+.idea/
+__pycache__/
+.env
+venv/
+data.sqlite
