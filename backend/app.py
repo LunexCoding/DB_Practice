@@ -15,7 +15,7 @@ from initializer.initializer import g_initializer
 class App:
     def __init__(self):
         if not FileSystem.exists(settingsConfig.DatabaseSettings["database"]):
-            g_initializer.run()
+            g_initializer.run()  # можно
 
         self.__window = MainWindow()
         self._ui_manager = UIManager(self.__window)

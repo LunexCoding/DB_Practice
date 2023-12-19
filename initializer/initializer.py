@@ -91,6 +91,7 @@ class _Initializer:
                 fixedAssetsAreAverage = fake.random_int(Constants.MIN_FIXED_ASSETS_ARE_AVERAGE,Constants.MAX_FIXED_ASSETS_ARE_AVERAGE)
                 enterprise.calcFinancialIndicators(numberOfEmployees, revenue, profit, fixedAssetsAreAverage)
                 print(enterprise.financialIndicators)
+        enterprise.saveDataByYearID(1)
 
     def generateYears(self):
         return [year for year in range(Constants.START_YEAR, Constants.START_YEAR + Constants.COUNT)]

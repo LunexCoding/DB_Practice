@@ -41,6 +41,17 @@ class Enterprise:
         self._capitalRatio = round((self._fixedAssetsAreAverage / self._numberOfEmployees) * rateInRubles, 2)
         self._equityReturn = round(((self._profit / self._fixedAssetsAreAverage) * rateInRubles) * 100, 2)
 
+    def saveDataByYearID(self, yearID):
+        with databaseSession as db:
+            data = db.getData(
+                SqlQueries.selectFromTable(DatabaseTables.FINANCIAL_INDICATORS, args=["ID", "Name"]),
+                all=True
+            )
+            print(data)
+
+    def loadDataByYearID(self, yearID):
+        ...
+
     @property
     def ID(self):
         return self._ID
